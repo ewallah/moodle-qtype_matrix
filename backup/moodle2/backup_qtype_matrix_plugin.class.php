@@ -11,8 +11,7 @@ class backup_qtype_matrix_plugin extends backup_qtype_plugin
     /**
      * Returns the qtype information to attach to question element
      */
-    protected function define_question_plugin_structure()
-    {
+    protected function define_question_plugin_structure() {
         // Define the virtual plugin element with the condition to fulfill
         $plugin = $this->get_plugin_element(null, '../../qtype', 'matrix');
         // Create one standard named plugin element (the visible container)
@@ -23,13 +22,13 @@ class backup_qtype_matrix_plugin extends backup_qtype_plugin
 
         // Now create the qtype own structures
         $matrix = new backup_nested_element('matrix', array('id'), array('grademethod', 'multiple', 'shuffleanswers', 'renderer'));
-        
+
         $matrix_cols = new backup_nested_element('cols');
         $matrix_col = new backup_nested_element('col', array('id'), array('shorttext', 'description'));
-        
+
         $matrix_rows = new backup_nested_element('rows');
         $matrix_row = new backup_nested_element('row', array('id'), array('shorttext', 'description', 'feedback'));
-        
+
         $matrix_weights = new backup_nested_element('weights');
         $matrix_weight = new backup_nested_element('weight', array('id'), array('rowid', 'colid', 'weight'));
 
@@ -38,10 +37,10 @@ class backup_qtype_matrix_plugin extends backup_qtype_plugin
 
         $matrix->add_child($matrix_cols);
         $matrix_cols->add_child($matrix_col);
-        
+
         $matrix->add_child($matrix_rows);
         $matrix_rows->add_child($matrix_row);
-        
+
         $matrix->add_child($matrix_weights);
         $matrix_weights->add_child($matrix_weight);
 

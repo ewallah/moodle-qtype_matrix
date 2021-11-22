@@ -12,17 +12,15 @@ defined('MOODLE_INTERNAL') || die();
 class qtype_matrix_test_helper extends question_test_helper
 {
 
-    public function get_test_questions()
-    {
+    public function get_test_questions() {
         return array('kprime', 'all', 'any', 'none', 'weighted', 'multiple', 'single');
     }
 
     /**
      *
-     * @return qtype_matrix_question 
+     * @return qtype_matrix_question
      */
-    public function make_matrix_question_multiple()
-    {
+    public function make_matrix_question_multiple() {
         $result = $this->make_matrix_question();
         $result->multiple = true;
         return $result;
@@ -30,10 +28,9 @@ class qtype_matrix_test_helper extends question_test_helper
 
     /**
      *
-     * @return qtype_matrix_question 
+     * @return qtype_matrix_question
      */
-    public function make_matrix_question_single()
-    {
+    public function make_matrix_question_single() {
         $result = $this->make_matrix_question();
         $result->multiple = false;
         return $result;
@@ -41,10 +38,9 @@ class qtype_matrix_test_helper extends question_test_helper
 
     /**
      *
-     * @return qtype_matrix_question 
+     * @return qtype_matrix_question
      */
-    public function make_matrix_question_kprime()
-    {
+    public function make_matrix_question_kprime() {
         $result = $this->make_matrix_question();
         $result->grademethod = 'kprime';
         return $result;
@@ -52,10 +48,9 @@ class qtype_matrix_test_helper extends question_test_helper
 
     /**
      *
-     * @return qtype_matrix_question 
+     * @return qtype_matrix_question
      */
-    public function make_matrix_question_all()
-    {
+    public function make_matrix_question_all() {
         $result = $this->make_matrix_question();
         $result->grademethod = 'all';
         return $result;
@@ -63,10 +58,9 @@ class qtype_matrix_test_helper extends question_test_helper
 
     /**
      *
-     * @return qtype_matrix_question 
+     * @return qtype_matrix_question
      */
-    public function make_matrix_question_any()
-    {
+    public function make_matrix_question_any() {
         $result = $this->make_matrix_question();
         $result->grademethod = 'any';
         return $result;
@@ -74,10 +68,9 @@ class qtype_matrix_test_helper extends question_test_helper
 
     /**
      *
-     * @return qtype_matrix_question 
+     * @return qtype_matrix_question
      */
-    public function make_matrix_question_none()
-    {
+    public function make_matrix_question_none() {
         $result = $this->make_matrix_question();
         $result->grademethod = 'none';
         return $result;
@@ -85,10 +78,9 @@ class qtype_matrix_test_helper extends question_test_helper
 
     /**
      *
-     * @return qtype_matrix_question 
+     * @return qtype_matrix_question
      */
-    public function make_matrix_question_weighted()
-    {
+    public function make_matrix_question_weighted() {
 
         question_bank::load_question_definition_classes('matrix');
         $result = new qtype_matrix_question();
@@ -131,10 +123,9 @@ class qtype_matrix_test_helper extends question_test_helper
 
     /**
      *
-     * @return qtype_matrix_question 
+     * @return qtype_matrix_question
      */
-    protected function make_matrix_question()
-    {
+    protected function make_matrix_question() {
         question_bank::load_question_definition_classes('matrix');
         $result = new qtype_matrix_question();
         test_question_maker::initialise_a_question($result);

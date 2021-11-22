@@ -34,7 +34,6 @@ function xmldb_qtype_matrix_upgrade($oldversion) {
         $newField = $table->add_field('shuffleanswers', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '1');
         $dbman->add_field($table, $newField);
 
-
         upgrade_plugin_savepoint(true, 2014040800, 'qtype', 'matrix');
     }
 

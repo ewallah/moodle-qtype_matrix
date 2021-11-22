@@ -18,28 +18,23 @@ require_once($CFG->dirroot . '/question/type/matrix/libs/question_matrix_store.p
 class qtype_matrix extends question_type
 {
 
-    public static function get_string($identifier, $component = 'qtype_matrix', $a = null)
-    {
+    public static function get_string($identifier, $component = 'qtype_matrix', $a = null) {
         return get_string($identifier, $component, $a);
     }
 
-    public static function gradings()
-    {
+    public static function gradings() {
         return qtype_matrix_grading::gradings();
     }
 
-    public static function grading($type)
-    {
+    public static function grading($type) {
         return qtype_matrix_grading::create($type);
     }
 
-    public static function defaut_grading()
-    {
+    public static function defaut_grading() {
         return qtype_matrix_grading::default_grading();
     }
 
-    function name()
-    {
+    function name() {
         return 'matrix';
     }
 
@@ -50,8 +45,7 @@ class qtype_matrix extends question_type
      * @param integer $context_id The context id
      * @return boolean to indicate success of failure.
      */
-    function delete_question_options($question_id, $context_id = null)
-    {
+    function delete_question_options($question_id, $context_id = null) {
         if (empty($question_id)) {
             return false;
         }
@@ -69,8 +63,7 @@ class qtype_matrix extends question_type
      * @param integer $context_id
      * @return boolean to indicate success of failure.
      */
-    function delete_question($question_id, $context_id = null)
-    {
+    function delete_question($question_id, $context_id = null) {
         if (empty($question_id)) {
             return false;
         }
@@ -90,20 +83,18 @@ class qtype_matrix extends question_type
     /**
      * @return boolean true if this question type sometimes requires manual grading.
      */
-    function is_manual_graded()
-    {
+    function is_manual_graded() {
         return true;
     }
 
     /**
-     * 
+     *
      * @param object $question
      * @return boolean
      */
-    function get_question_options($question)
-    {
+    function get_question_options($question) {
         parent::get_question_options($question);
-        $matrix = self::retrieve_matrix($question->id);       
+        $matrix = self::retrieve_matrix($question->id);
         if ($matrix) {
             $question->options->rows = $matrix->rows;
             $question->options->cols = $matrix->cols;
@@ -125,8 +116,7 @@ class qtype_matrix extends question_type
         return true;
     }
 
-    static function retrieve_matrix($question_id)
-    {
+    static function retrieve_matrix($question_id) {
         $store = new question_matrix_store();
 
         if (empty($question_id)) {
@@ -144,7 +134,7 @@ class qtype_matrix extends question_type
 
         $raw_weights = $store->get_matrix_weights_by_question_id($question_id);
 
-        //initialize weights      
+        // initialize weights
         $matrix->weights = array();
         foreach ($matrix->rows as $row) {
             $matrix->weights[$row->id] = array();
@@ -152,7 +142,7 @@ class qtype_matrix extends question_type
                 $matrix->weights[$row->id][$col->id] = 0;
             }
         }
-        //set non zero weights
+        // set non zero weights
         foreach ($raw_weights as $weight) {
             $matrix->weights[$weight->rowid][$weight->colid] = (float) $weight->weight;
         }
@@ -165,8 +155,7 @@ class qtype_matrix extends question_type
      * @param question_definition $question the question_definition we are creating.
      * @param object $questiondata the question data loaded from the database.
      */
-    protected function initialise_question_instance(question_definition $question, $questiondata)
-    {
+    protected function initialise_question_instance(question_definition $question, $questiondata) {
         parent::initialise_question_instance($question, $questiondata);
         $question->rows = $questiondata->options->rows;
         $question->cols = $questiondata->options->cols;
@@ -183,8 +172,7 @@ class qtype_matrix extends question_type
      * @param object $question This holds the information from the editing form, it is not a standard question object.
      * @return object $result->error or $result->noticeyesno or $result->notice
      */
-    function save_question_options($question)
-    {
+    function save_question_options($question) {
         global $DB;
         $store = new question_matrix_store();
 
@@ -199,7 +187,7 @@ class qtype_matrix extends question_type
         $matrix = (object) $store->get_matrix_by_question_id($question_id);
 
         $is_new = !isset($matrix->id) || empty($matrix->id);
-        
+
         $matrix->questionid = $question_id;
         $matrix->multiple = $question->multiple;
         $matrix->grademethod = $question->grademethod;
@@ -230,7 +218,7 @@ class qtype_matrix extends question_type
             $delete = empty($row->shorttext);
 
             if ($delete && $is_new) {
-                //noop
+                // noop
             } else if ($delete) {
                 $store->delete_matrix_row($row);
             } else if ($is_new || $make_copy) {
@@ -256,7 +244,7 @@ class qtype_matrix extends question_type
             );
             $delete = empty($col->shorttext);
             if ($delete && $is_new) {
-                //noop
+                // noop
             } else if ($delete) {
                 $store->delete_matrix_col($col);
             } else if (!$col_id || $make_copy) {
@@ -270,25 +258,25 @@ class qtype_matrix extends question_type
 
         /**
          * Wheights
-         * 
+         *
          * First we delete all weights. (There is no danger of deleting the original weights when making a copy, because we are anyway deleting only weights associated with our newly created question ID).
          * Then we recreate them. (Because updating is too much of a pain)
-         * 
+         *
          */
         $store->delete_matrix_weights($question_id);
 
         /**
          * When we switch from multiple answers to single answers (or the other
-         * way around) we loose answers. 
-         * 
-         * To avoid loosing information when we switch, we test if the weight matrix is empty. 
-         * If the weight matrix is empty we try to read from the other 
+         * way around) we loose answers.
+         *
+         * To avoid loosing information when we switch, we test if the weight matrix is empty.
+         * If the weight matrix is empty we try to read from the other
          * representation directly from POST data.
-         * 
+         *
          * We read from the POST because post data are not read into the question
          * object because there is no corresponding field.
-         * 
-         * This is bit hacky but it is safe. The to_weight_matrix returns only 
+         *
+         * This is bit hacky but it is safe. The to_weight_matrix returns only
          * 0 or 1.
          */
         $weights = array();
@@ -322,37 +310,36 @@ class qtype_matrix extends question_type
     }
 
     /**
-     * Transform the weight from the edit-form's representation to a standard matrix 
+     * Transform the weight from the edit-form's representation to a standard matrix
      * representation
-     * 
+     *
      * Input data is either
-     * 
+     *
      *      $question->{cell0_1] = 1
-     * 
+     *
      * or
-     * 
+     *
      *      $question->{cell0] = 3
-     * 
+     *
      * Output
-     * 
+     *
      *      [ 1 0 1 0 ]
      *      [ 0 0 0 1 ]
      *      [ 1 1 1 0 ]
      *      [ 0 1 0 1 ]
-     * 
-     * 
+     *
+     *
      * @param object $data              Question's data, either from the question object or from the post
      * @param boolean $from_multiple    Whether we extract from multiple representation or not
      * @result array                    The weights
      */
-    public function to_weigth_matrix($data, $from_multiple)
-    {
+    public function to_weigth_matrix($data, $from_multiple) {
         $data = (object) $data;
         $result = array();
         $row_count = 20;
         $col_count = 20;
 
-        //init
+        // init
         for ($row = 0; $row < $row_count; $row++) {
             for ($col = 0; $col < $col_count; $col++) {
                 $result[$row][$col] = 0;
@@ -381,12 +368,11 @@ class qtype_matrix extends question_type
 
     /**
      * True if the matrix is empty (contains only zeroes). False otherwise.
-     * 
+     *
      * @param array $matrix Array of arrays
      * @return boolean True if the matrix contains only zeros. False otherwise
      */
-    public function is_matrix_empty($matrix)
-    {
+    public function is_matrix_empty($matrix) {
         foreach ($matrix as $row) {
             foreach ($row as $value) {
                 if ($value && $value > 0) {
@@ -405,8 +391,7 @@ class qtype_matrix extends question_type
      * @param object $question
      * @param string $wizardnow is '' for first page.
      */
-    public function display_question_editing_page($mform, $question, $wizardnow)
-    {
+    public function display_question_editing_page($mform, $question, $wizardnow) {
         global $OUTPUT;
         $heading = $this->get_heading(empty($question->id));
 
@@ -419,8 +404,7 @@ class qtype_matrix extends question_type
     }
 
     // mod_ND : BEGIN
-    public function extra_question_fields()
-    {
+    public function extra_question_fields() {
         return array('question_matrix', 'use_dnd_ui', 'grademethod', 'multiple');
     }
 
@@ -440,29 +424,29 @@ class qtype_matrix extends question_type
             return false;
         }
 
-        //initial
+        // initial
         $question = $format->import_headers($data);
         $question->qtype = 'matrix';
         $question->options = new stdClass();
 
-        //use_dnd_ui
+        // use_dnd_ui
         $question->options->use_dnd_ui = $format->trans_single(
             $format->getpath($data, array('#', 'use_dnd_ui', 0, '#'), 0));
 
-        //grademethod
+        // grademethod
         $question->grademethod = $format->getpath(
             $data,
             array('#', 'grademethod', 0, '#'),
             self::defaut_grading()->get_name()
         );
 
-        //shuffleanswers
+        // shuffleanswers
         $question->options->shuffleanswers = $format->trans_single($format->getpath(
             $data,
             array('#', 'shuffleanswers', 0, '#'),
             1));
 
-        //multiple
+        // multiple
         $multiple  = $format->trans_single($format->getpath(
             $data,
             array('#', 'multiple', 0, '#'),
@@ -474,10 +458,10 @@ class qtype_matrix extends question_type
             $question->multiple = false;
         }
 
-        //renderer
+        // renderer
         $question->options->renderer = $format->getpath($data, array('#', 'renderer', 0, '#'), 'matrix');
 
-        //rows
+        // rows
         $question->rows = array();
         $question->rows_shorttext = array();
         $question->rows_description = array();
@@ -506,7 +490,7 @@ class qtype_matrix extends question_type
             $index++;
         }
 
-        //cols
+        // cols
         $question->cols = array();
         $question->cols_shorttext = array();
         $question->cols_description = array();
@@ -526,7 +510,7 @@ class qtype_matrix extends question_type
             $index++;
         }
 
-        //weights
+        // weights
         $question->weights = array();
         $weights_of_rowsXML = $data['#']['weights-of-row'];
         $row_index = 0;
@@ -547,7 +531,7 @@ class qtype_matrix extends question_type
                 foreach ($weights_of_rowXML['#']['weight-of-col'] as $weight_of_colXML){
                     if(floatval ($weight_of_colXML['#']) != 0){
                         $key = qtype_matrix_grading::cell_name($row_index, $col_index, $question->multiple);
-                        $question->{$key} =  $col_index;
+                        $question->{$key} = $col_index;
                     }
                     $col_index ++;
                 }
@@ -570,10 +554,10 @@ class qtype_matrix extends question_type
     public function export_to_xml($question, qformat_xml $format, $extra = null) {
         $output = '';
 
-        //use_dnd_ui
+        // use_dnd_ui
         $output .= "    <use_dnd_ui>" . $question->options->use_dnd_ui . "</use_dnd_ui>\n";
 
-        //rows
+        // rows
         foreach ($question->options->rows as $rowId => $row) {
             $output .= "<!--row: ".$rowId."-->\n";
             $output .= "    <row>\n";
@@ -587,7 +571,7 @@ class qtype_matrix extends question_type
             $output .= "    </row>\n";
         }
 
-        //cols
+        // cols
         foreach ($question->options->cols as $colId => $col) {
             $output .= "<!--col: ".$colId."-->\n";
             $output .= "    <col>\n";
@@ -598,7 +582,7 @@ class qtype_matrix extends question_type
             $output .= "    </col>\n";
         }
 
-        //weights
+        // weights
         foreach ($question->options->weights as $rowId => $weights_of_row) {
             $output .= "<!--weights of row: ".$rowId."-->\n";
             $output .= "    <weights-of-row>\n";
@@ -609,21 +593,21 @@ class qtype_matrix extends question_type
             $output .= "    </weights-of-row>\n";
         }
 
-        //grademethod
+        // grademethod
         $output .= '    <grademethod>' . $question->options->grademethod .
             "</grademethod>\n";
 
-        //shuffleanswers
+        // shuffleanswers
         $output .= '    <shuffleanswers>' . $question->options->shuffleanswers .
             "</shuffleanswers>\n";
 
-        //multiple
+        // multiple
         $multiple = 1;
         if(!$question->options->multiple){
             $multiple = 0;
         }
         $output .= '    <multiple>' . $multiple . "</multiple>\n";
-        //renderer
+        // renderer
         $output .= '    <renderer>' . $question->options->renderer . "</renderer>\n";
 
         return $output;

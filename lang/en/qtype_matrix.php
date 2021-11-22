@@ -32,21 +32,21 @@ Kprime questions consist of an item stem and four corresponding answer statement
 
 $string['pluginname_link'] = 'question/type/matrix';
 
-//gradings
+// gradings
 $string['all'] = 'Subpoints';
 $string['kany'] = 'Kprime (at least one correct, no wrong answer)  ';
 $string['kprime'] = "Kprime1/0";
 
-//strings
+// strings
 $string['true'] = 'True';
 $string['false'] = 'False';
 
-//form
+// form
 $string['multipleallowed'] = 'Allow multiple responses per answer statement?';
 
 $string['grademethod'] = 'Scoring method';
 
-//$string['renderer'] = 'Renderer';
+// $string['renderer'] = 'Renderer';
 
 $string['rowsheader'] = 'Matrix rows';
 $string['rowsheader_desc'] = '<p>Shorttext will be used when it\'s present, with the longer text as a tooltip.<br />Be mindful of how this will be displayed</p>
@@ -57,7 +57,7 @@ $string['rows_shorttext'] = 'Answer statement';
 $string['rows_description'] = 'Description';
 $string['rows_feedback'] = 'Feedback';
 
-//$string['addmorerows'] = 'Add {$a} more rows';
+// $string['addmorerows'] = 'Add {$a} more rows';
 
 $string['colsheader'] = 'Matrix columns';
 $string['colsheader_desc'] = '<p>Shorttext will be used when it\'s present, with the longer text as a tooltip.<br />Be mindful of how this will be displayed.</p>
@@ -67,11 +67,11 @@ $string['colsheader_desc'] = '<p>Shorttext will be used when it\'s present, with
 $string['cols_shorttext'] = 'Response';
 $string['cols_description'] = 'Description';
 
-//$string['addmorecols'] = 'Add {$a} more columns';
+// $string['addmorecols'] = 'Add {$a} more columns';
 
 $string['refresh_matrix'] = 'Refresh response matrix';
 
-//$string['updatematrix'] = 'Update matrix to reflect new options';
+// $string['updatematrix'] = 'Update matrix to reflect new options';
 $string['matrixheader'] = 'Response matrix';
 
 $string['mustdefine1by1'] = 'You must define at least a 1 x 1 matrix; with either short or long answer defined for each row and column';

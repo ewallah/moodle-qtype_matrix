@@ -14,8 +14,7 @@ require_once($CFG->dirroot . '/question/engine/simpletest/helpers.php');
 class qtype_matrix_question_test extends UnitTestCase
 {
 
-    public function test_is_complete_response()
-    {
+    public function test_is_complete_response() {
         $question = self::make_question('multiple');
 
         $answer = array();
@@ -40,8 +39,7 @@ class qtype_matrix_question_test extends UnitTestCase
         $this->assertTrue($question->is_complete_response($answer));
     }
 
-    public function test_get_correct_response()
-    {
+    public function test_get_correct_response() {
         $question = self::make_question('multiple');
 
         $answer = self::make_answer_correct($question);
@@ -60,15 +58,13 @@ class qtype_matrix_question_test extends UnitTestCase
         $this->assertNotIdentical($answer, $question->get_correct_response());
     }
 
-    public function test_get_question_summary()
-    {
+    public function test_get_question_summary() {
         $question = self::make_question('multiple');
         $summary = $question->get_question_summary();
         $this->assertFalse(empty($summary));
     }
 
-    public function test_summarise_response()
-    {
+    public function test_summarise_response() {
         $question = self::make_question('multiple');
 
         $answer = self::make_answer_correct($question);
@@ -92,8 +88,7 @@ class qtype_matrix_question_test extends UnitTestCase
         $this->assertFalse(empty($summary));
     }
 
-    public function test_is_same_response()
-    {
+    public function test_is_same_response() {
         $question = self::make_question('multiple');
 
         $correct = $question->get_correct_response();
@@ -107,8 +102,7 @@ class qtype_matrix_question_test extends UnitTestCase
         $this->assertNotIdentical($answer, $correct);
     }
 
-    public function test_grading()
-    {
+    public function test_grading() {
         $question = self::make_question('all');
         $question->multiple = true;
         $this->question_grading_pass($question, 0.5);
@@ -158,8 +152,7 @@ class qtype_matrix_question_test extends UnitTestCase
         $this->question_grading_pass($question, 0);
     }
 
-    protected function question_grading_pass($question, $partial_grading = 0.5)
-    {
+    protected function question_grading_pass($question, $partial_grading = 0.5) {
         $answer = self::make_answer_correct($question);
         $grade = $question->grade_response($answer);
         $this->assertEqual(array(1, question_state::$gradedright), $grade);
@@ -185,8 +178,7 @@ class qtype_matrix_question_test extends UnitTestCase
      * @param string $type
      * @return question_definition the requested question object.
      */
-    protected static function make_question($type = 'kprime')
-    {
+    protected static function make_question($type = 'kprime') {
         return test_question_maker::make_question('matrix', $type);
     }
 
@@ -195,8 +187,7 @@ class qtype_matrix_question_test extends UnitTestCase
      * @param qtype_matrix_question $question
      * @return array
      */
-    protected static function make_answer_correct($question)
-    {
+    protected static function make_answer_correct($question) {
         $result = array();
         foreach ($question->rows as $row) {
             $col = 0;
@@ -212,8 +203,7 @@ class qtype_matrix_question_test extends UnitTestCase
      * @param qtype_matrix_question $question
      * @return array
      */
-    protected static function make_answer_incorrect($question)
-    {
+    protected static function make_answer_incorrect($question) {
         $result = array();
         foreach ($question->rows as $row) {
             $col = 3;
@@ -229,8 +219,7 @@ class qtype_matrix_question_test extends UnitTestCase
      * @param qtype_matrix_question $question
      * @return array
      */
-    protected static function make_answer_partial($question)
-    {
+    protected static function make_answer_partial($question) {
         $result = array();
         foreach ($question->rows as $row) {
             $col = $row->id < 2 ? 0 : 3;
@@ -246,24 +235,23 @@ class qtype_matrix_question_test extends UnitTestCase
      * @param qtype_matrix_question $question
      * @return array
      */
-    protected static function make_answer_multiple_partial($question)
-    {
+    protected static function make_answer_multiple_partial($question) {
         $result = array();
         foreach ($question->rows as $row) {
             if ($row->id < 2) {
-                //all correct
+                // all correct
                 $key = $question->key($row, $col = 0);
                 $result[$key] = 'on';
                 $key = $question->key($row, $col = 1);
                 $result[$key] = 'on';
             } else if ($row->id == 2) {
-                //one correct one wrong
+                // one correct one wrong
                 $key = $question->key($row, $col = 1);
                 $result[$key] = 'on';
                 $key = $question->key($row, $col = 2);
                 $result[$key] = 'on';
             } else {
-                //all wrong
+                // all wrong
                 $key = $question->key($row, $col = 2);
                 $result[$key] = 'on';
                 $key = $question->key($row, $col = 3);
@@ -279,8 +267,7 @@ class qtype_matrix_question_test extends UnitTestCase
      * @param qtype_matrix_question $question
      * @return array
      */
-    protected static function make_answer_multiple_correct($question)
-    {
+    protected static function make_answer_multiple_correct($question) {
         $result = array();
         foreach ($question->rows as $row) {
             $key = $question->key($row, $col = 0);
@@ -297,8 +284,7 @@ class qtype_matrix_question_test extends UnitTestCase
      * @param qtype_matrix_question $question
      * @return array
      */
-    protected static function make_answer_multiple_incorrect($question)
-    {
+    protected static function make_answer_multiple_incorrect($question) {
         $result = array();
         foreach ($question->rows as $row) {
             $key = $question->key($row, $col = 2);

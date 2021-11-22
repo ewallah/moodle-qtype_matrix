@@ -11,14 +11,14 @@ require_once($CFG->dirroot . '/question/type/matrix/libs/config.php');
 
 /**
  * matrix editing form definition. For information about the Moodle forms library,
- * which is based on the HTML Quickform PEAR library 
- * 
- * @see http://docs.moodle.org/en/Development:lib/formslib.php 
+ * which is based on the HTML Quickform PEAR library
+ *
+ * @see http://docs.moodle.org/en/Development:lib/formslib.php
  */
 class qtype_matrix_edit_form extends question_edit_form implements ArrayAccess
 {
 
-    //How many elements are added each time somebody click the add row/add column button.
+    // How many elements are added each time somebody click the add row/add column button.
     const DEFAULT_REPEAT_ELEMENTS = 1;
     const PARAM_COLS = 'cols_shorttext';
     const DEFAULT_COLS = 2;
@@ -36,17 +36,15 @@ class qtype_matrix_edit_form extends question_edit_form implements ArrayAccess
 
     /**
      *
-     * @var matrix_form_builder 
+     * @var matrix_form_builder
      */
     private $builder = null;
 
-    function qtype()
-    {
+    function qtype() {
         return 'matrix';
     }
 
-    function definition_inner($mform)
-    {
+    function definition_inner($mform) {
         $this->builder = new matrix_form_builder($mform);
         $builder = $this->builder;
 
@@ -72,16 +70,14 @@ class qtype_matrix_edit_form extends question_edit_form implements ArrayAccess
      * This method is called after definition(), data submission and set_data().
      * All form setup that is dependent on form values should go in here.
      */
-    function definition_after_data()
-    {
+    function definition_after_data() {
         $builder = $this->builder;
 
         $this->add_matrix();
         $builder->add_javascript($this->get_javascript());
     }
 
-    function set_data($question)
-    {
+    function set_data($question) {
         $is_new = empty($question->id);
         if (!$is_new) {
 
@@ -120,7 +116,6 @@ class qtype_matrix_edit_form extends question_edit_form implements ArrayAccess
 
                     $weight = $options->weights[$row->id][$col->id];
 
-
                     $question->{$cell_name_multiple_answers} = ($weight > 0) ? 'on' : '';
                     $question->{$cell_name_single_answer} = $col_index;
                     if (!$options->multiple && $weight > 0) {
@@ -138,8 +133,7 @@ class qtype_matrix_edit_form extends question_edit_form implements ArrayAccess
         parent::set_data($question);
     }
 
-    function validation($data, $files)
-    {
+    function validation($data, $files) {
         $errors = parent::validation($data, $files);
         if (config::show_kprime_gui()) {
             if ($this->col_count($data) == 0) {
@@ -165,19 +159,16 @@ class qtype_matrix_edit_form extends question_edit_form implements ArrayAccess
         return $errors ? $errors : true;
     }
 
-    protected function col_count($data)
-    {
+    protected function col_count($data) {
         return count($data['cols_shorttext']);
     }
 
-    protected function row_count($data)
-    {
+    protected function row_count($data) {
         return count($data['rows_shorttext']);
     }
 
-    //elements
-    public function add_multiple()
-    {
+    // elements
+    public function add_multiple() {
         // multiple allowed
         $builder = $this->builder;
 
@@ -190,8 +181,7 @@ class qtype_matrix_edit_form extends question_edit_form implements ArrayAccess
         }
     }
 
-    public function add_grading()
-    {
+    public function add_grading() {
         $builder = $this->builder;
 
         // grading method.
@@ -211,8 +201,7 @@ class qtype_matrix_edit_form extends question_edit_form implements ArrayAccess
         $builder->add_help_button(self::PARAM_GRADE_METHOD);
     }
 
-    function add_matrix()
-    {
+    function add_matrix() {
         $mform = $this->_form;
         $builder = $this->builder;
 
@@ -331,8 +320,7 @@ class qtype_matrix_edit_form extends question_edit_form implements ArrayAccess
         $this->_form->setExpanded('matrixheader');
     }
 
-    public function get_javascript()
-    {
+    public function get_javascript() {
         return <<<EOT
         
         var YY = null;               
@@ -375,11 +363,10 @@ EOT;
 
     /**
      * Returns the current number of columns
-     * 
+     *
      * @return integer The number of columns
      */
-    protected function param_cols()
-    {
+    protected function param_cols() {
         $result = self::DEFAULT_COLS;
         if (isset($_POST[self::PARAM_COLS])) {
             $result = count($_POST[self::PARAM_COLS]);
@@ -397,16 +384,14 @@ EOT;
 
     /**
      * True if the user asked to add a column. False otherwise.
-     * 
+     *
      * @return columns to add
      */
-    protected function param_add_columns()
-    {
+    protected function param_add_columns() {
         return optional_param(self::PARAM_ADD_COLUMNS, '', PARAM_TEXT);
     }
 
-    protected function param_rows()
-    {
+    protected function param_rows() {
         $result = self::DEFAULT_ROWS;
 
         if (isset($_POST[self::PARAM_ROWS])) {
@@ -424,53 +409,46 @@ EOT;
 
     /**
      * True if the user asked to add a row. False otherwise.
-     * 
+     *
      * @return rows to add
      */
-    protected function param_add_rows()
-    {
+    protected function param_add_rows() {
         return (optional_param(self::PARAM_ADD_ROWS, '', PARAM_TEXT)) ? true : false;
     }
 
     /**
-     * 
+     *
      * @return The grade method parameter
      */
-    protected function param_grade_method()
-    {
+    protected function param_grade_method() {
         $data = $this->_form->exportValues();
         return isset($data[self::PARAM_GRADE_METHOD]) ? $data[self::PARAM_GRADE_METHOD] : qtype_matrix::defaut_grading()->get_name();
     }
 
     /**
-     * 
+     *
      * @return Whether the question allows multiple answers
      */
-    protected function param_multiple()
-    {
+    protected function param_multiple() {
         $data = $this->_form->exportValues();
         return isset($data[self::PARAM_MULTIPLE]) ? $data[self::PARAM_MULTIPLE] : self::DEFAULT_MULTIPLE;
     }
 
     // implement ArrayAccess
 
-    public function offsetExists($offset)
-    {
+    public function offsetExists($offset) {
         return $this->_form->elementExists($offset);
     }
 
-    public function offsetGet($offset)
-    {
+    public function offsetGet($offset) {
         return $this->_form->getElement($offset);
     }
 
-    public function offsetSet($offset, $value)
-    {
+    public function offsetSet($offset, $value) {
         $this->_form->addElement($value);
     }
 
-    public function offsetUnset($offset)
-    {
+    public function offsetUnset($offset) {
         $this->_form->removeElement($offset);
     }
 

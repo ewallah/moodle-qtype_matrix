@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Per row grading. The total grade is the average of grading received 
+ * Per row grading. The total grade is the average of grading received
  * for reach one of the rows.
- * 
+ *
  * Any correct and no wrong answer to get 100% otherwise 0
  */
 class qtype_matrix_grading_kany extends qtype_matrix_grading
@@ -11,24 +11,21 @@ class qtype_matrix_grading_kany extends qtype_matrix_grading
 
     const TYPE = 'kany';
 
-    public static function get_name()
-    {
+    public static function get_name() {
         return self::TYPE;
     }
 
-    public static function get_title()
-    {
+    public static function get_title() {
         return qtype_matrix::get_string(self::TYPE);
     }
 
     /**
-     * Factory 
+     * Factory
      *
      * @param string $type
      * @return qtype_matrix_grading_kany
      */
-    public static function create($type)
-    {
+    public static function create($type) {
         static $result = false;
         if ($result) {
             return $result;
@@ -36,8 +33,7 @@ class qtype_matrix_grading_kany extends qtype_matrix_grading
         return $result = new self();
     }
 
-    public function grade_question($question, $answers)
-    {
+    public function grade_question($question, $answers) {
         $numberOfCorrectRows = 0;
         foreach ($question->rows as $row) {
             $grade = $this->grade_row($question, $row, $answers);
@@ -55,14 +51,13 @@ class qtype_matrix_grading_kany extends qtype_matrix_grading
 
     /**
      * Grade a row
-     * 
+     *
      * @param qtype_matrix_question $question   The question to grade
      * @param integer|object $row               Row to grade
      * @param array $responses                  User's responses
      * @return float                            The row grade, either 0 or 1
      */
-    public function grade_row($question, $row, $responses)
-    {
+    public function grade_row($question, $row, $responses) {
         $one_correct_answer = false;
         foreach ($question->cols as $col) {
             $answer = $question->answer($row, $col);
@@ -77,8 +72,7 @@ class qtype_matrix_grading_kany extends qtype_matrix_grading
         return ($one_correct_answer) ? 1 : 0;
     }
 
-    public function validation($data)
-    {
+    public function validation($data) {
         return array();
     }
 
