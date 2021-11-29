@@ -1,61 +1,74 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Unit tests for the matrix question definition class.
  */
 defined('MOODLE_INTERNAL') || die();
-
-require_once($CFG->dirroot . '/question/engine/simpletest/helpers.php');
+global $CFG;
+require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
 
 /**
  * Unit tests for the true-false question definition class.
  *
  */
-class qtype_matrix_question_test extends UnitTestCase
+class qtype_matrix_question_test extends advanced_testcase
 {
 
     public function test_is_complete_response() {
+        $question = self::make_question();
+        // TODO: Should be false.
+        $this->assertTrue($question->is_complete_response([]));
+        $this->assertTrue($question->is_complete_response(self::make_answer_correct($question)));
+        $this->assertTrue($question->is_complete_response(self::make_answer_incorrect($question)));
+        $this->assertTrue($question->is_complete_response(self::make_answer_partial($question)));
+
         $question = self::make_question('multiple');
-
-        $answer = array();
-        $this->assertTrue($question->is_complete_response($answer));
-
-        $answer = self::make_answer_correct($question);
-        $this->assertTrue($question->is_complete_response($answer));
-
-        $answer = self::make_answer_incorrect($question);
-        $this->assertTrue($question->is_complete_response($answer));
+        // TODO: Should be false.
+        $this->assertTrue($question->is_complete_response([]));
+        $this->assertTrue($question->is_complete_response(self::make_answer_correct($question)));
+        $this->assertTrue($question->is_complete_response(self::make_answer_incorrect($question)));
+        $this->assertTrue($question->is_complete_response(self::make_answer_partial($question)));
 
         $question = self::make_question('single');
-        $answer = array();
-        $this->assertFalse($question->is_complete_response($answer));
-        $message = $question->get_validation_error($answer);
-        $this->assertFalse(empty($message));
+        $this->assertFalse($question->is_complete_response([]));
+        $this->assertTrue($question->is_complete_response(self::make_answer_correct($question)));
+        $this->assertTrue($question->is_complete_response(self::make_answer_incorrect($question)));
+        $this->assertTrue($question->is_complete_response(self::make_answer_partial($question)));
 
-        $answer = self::make_answer_correct($question);
-        $this->assertTrue($question->is_complete_response($answer));
-
-        $answer = self::make_answer_incorrect($question);
-        $this->assertTrue($question->is_complete_response($answer));
+        $this->assertNotEmpty($question->get_validation_error([]));
     }
 
     public function test_get_correct_response() {
         $question = self::make_question('multiple');
 
         $answer = self::make_answer_correct($question);
-        $correct = $question->get_correct_response();
-        $this->assertIdentical($answer, $correct);
+        $question->start_attempt(new question_attempt_step($answer), 2);
+        $this->assertEquals($answer, $question->get_correct_response());
 
         $answer = self::make_answer_incorrect($question);
-        $this->assertNotIdentical($answer, $question->get_correct_response());
+        $this->assertNotEquals($answer, $question->get_correct_response());
 
         $question = self::make_question('single');
-
+        $question->start_attempt(new question_attempt_step(), 1);
         $answer = self::make_answer_correct($question);
-        $this->assertIdentical($answer, $question->get_correct_response());
+        $this->assertEquals($answer, $question->get_correct_response());
 
         $answer = self::make_answer_incorrect($question);
-        $this->assertNotIdentical($answer, $question->get_correct_response());
+        $this->assertNotEquals($answer, $question->get_correct_response());
     }
 
     public function test_get_question_summary() {
@@ -66,6 +79,7 @@ class qtype_matrix_question_test extends UnitTestCase
 
     public function test_summarise_response() {
         $question = self::make_question('multiple');
+        $question->start_attempt(new question_attempt_step(), 1);
 
         $answer = self::make_answer_correct($question);
         $summary = $question->summarise_response($answer);
@@ -76,6 +90,7 @@ class qtype_matrix_question_test extends UnitTestCase
         $this->assertFalse(empty($summary));
 
         $question = self::make_question('single');
+        $question->start_attempt(new question_attempt_step(), 1);
         $summary = $question->get_question_summary();
         $this->assertFalse(empty($summary));
 
@@ -90,87 +105,59 @@ class qtype_matrix_question_test extends UnitTestCase
 
     public function test_is_same_response() {
         $question = self::make_question('multiple');
+        $question->start_attempt(new question_attempt_step(), 1);
 
         $correct = $question->get_correct_response();
         $answer = self::make_answer_correct($question);
 
-        $this->assertIdentical($correct, $answer);
-        $this->assertIdentical($correct, $correct);
+        $this->assertEquals($correct, $answer);
 
         $answer = self::make_answer_incorrect($question);
-        $this->assertIdentical($answer, $answer);
-        $this->assertNotIdentical($answer, $correct);
+        $this->assertEquals($answer, $answer);
+        $this->assertNotEquals($answer, $correct);
     }
 
     public function test_grading() {
         $question = self::make_question('all');
         $question->multiple = true;
-        $this->question_grading_pass($question, 0.5);
-
-        $answer = self::make_answer_multiple_partial($question);
-        $grade = $question->grade_response($answer);
-        $this->assertEqual(array(0, question_state::$gradedwrong), $grade);
-
+        $this->question_grading_pass($question);
+        $question = self::make_question('all');
         $question->multiple = false;
-        $this->question_grading_pass($question, 0.5);
+        $this->question_grading_pass($question);
 
-        $question = self::make_question('any');
+        $question = self::make_question('kany');
         $question->multiple = true;
-        $this->question_grading_pass($question, 0.5);
-
-        $answer = self::make_answer_multiple_partial($question);
-        $grade = $question->grade_response($answer);
-        $this->assertEqual(array(0, question_state::$gradedwrong), $grade);
-
+        $this->question_grading_pass($question);
+        $question = self::make_question('kany');
         $question->multiple = false;
-        $this->question_grading_pass($question, 0.5);
-
-        $question = self::make_question('weighted');
-        $question->multiple = true;
-
-        $answer = self::make_answer_multiple_partial($question);
-        $grade = $question->grade_response($answer);
-        $this->assertEqual(array(5 / 8, question_state::$gradedpartial), $grade);
-
-        $answer = self::make_answer_multiple_correct($question);
-        $grade = $question->grade_response($answer);
-        $this->assertEqual(array(1, question_state::$gradedright), $grade);
-
-        $answer = self::make_answer_multiple_incorrect($question);
-        $grade = $question->grade_response($answer);
-        $this->assertEqual(array(0, question_state::$gradedwrong), $grade);
+        $this->question_grading_pass($question);
 
         $question = self::make_question('kprime');
         $question->multiple = true;
         $this->question_grading_pass($question, 0);
-
-        $answer = self::make_answer_multiple_partial($question);
-        $grade = $question->grade_response($answer);
-        $this->assertEqual(array(0, question_state::$gradedwrong), $grade);
-
         $question->multiple = false;
         $this->question_grading_pass($question, 0);
     }
 
-    protected function question_grading_pass($question, $partial_grading = 0.5) {
+    protected function question_grading_pass($question, $partialgrading = 0.5) {
         $answer = self::make_answer_correct($question);
         $grade = $question->grade_response($answer);
-        $this->assertEqual(array(1, question_state::$gradedright), $grade);
+        $this->assertEquals([1, question_state::$gradedright], $grade);
 
         $answer = self::make_answer_incorrect($question);
         $grade = $question->grade_response($answer);
-        $this->assertEqual(array(0, question_state::$gradedwrong), $grade);
+        $this->assertEquals([0, question_state::$gradedwrong], $grade);
 
         $answer = self::make_answer_partial($question);
         $grade = $question->grade_response($answer);
-        if ($partial_grading == 0) {
+        if ($partialgrading === 0) {
             $state = question_state::$gradedwrong;
-        } else if ($partial_grading == 1) {
+        } else if ($partialgrading === 1) {
             $state = question_state::$gradedright;
         } else {
             $state = question_state::$gradedpartial;
         }
-        $this->assertEqual(array($partial_grading, $state), $grade);
+        $this->assertEquals([$partialgrading, $state], $grade);
     }
 
     /**
@@ -239,19 +226,19 @@ class qtype_matrix_question_test extends UnitTestCase
         $result = array();
         foreach ($question->rows as $row) {
             if ($row->id < 2) {
-                // all correct
+                // All correct.
                 $key = $question->key($row, $col = 0);
                 $result[$key] = 'on';
                 $key = $question->key($row, $col = 1);
                 $result[$key] = 'on';
             } else if ($row->id == 2) {
-                // one correct one wrong
+                // One correct one wrong.
                 $key = $question->key($row, $col = 1);
                 $result[$key] = 'on';
                 $key = $question->key($row, $col = 2);
                 $result[$key] = 'on';
             } else {
-                // all wrong
+                // All wrong.
                 $key = $question->key($row, $col = 2);
                 $result[$key] = 'on';
                 $key = $question->key($row, $col = 3);

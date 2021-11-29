@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * The question type class for the matrix question type.
@@ -11,8 +25,7 @@ require_once($CFG->dirroot . '/question/type/matrix/libs/lang.php');
 /**
  * Represents a matrix question.
  */
-class qtype_matrix_question extends question_graded_automatically_with_countback implements IteratorAggregate
-{
+class qtype_matrix_question extends question_graded_automatically_with_countback implements IteratorAggregate {
 
     const KEY_ROWS_ORDER = '_order';
 
@@ -53,14 +66,13 @@ class qtype_matrix_question extends question_graded_automatically_with_countback
      */
     public function weight($row = null, $col = null) {
         if (is_string($row) && is_null($col)) {
-            // $key = $row;
             $key = str_replace('cell', $col, $row);
-            list($row_id, $col_id) = explode('x', $key);
+            list($rowid, $colid) = explode('x', $key);
         } else {
-            $row_id = is_object($row) ? $row->id : $row;
-            $col_id = is_object($col) ? $col->id : $col;
+            $rowid = is_object($row) ? $row->id : $row;
+            $colid = is_object($col) ? $col->id : $col;
         }
-        return (float) $this->weights[$row_id][$col_id];
+        return (float) $this->weights[$rowid][$colid];
     }
 
     /**
@@ -71,11 +83,11 @@ class qtype_matrix_question extends question_graded_automatically_with_countback
      * @return string
      */
     public function key($row, $col, $multiple = null) {
-        $row_id = is_object($row) ? $row->id : $row;
-        $col_id = is_object($col) ? $col->id : $col;
+        $rowid = is_object($row) ? $row->id : $row;
+        $colid = is_object($col) ? $col->id : $col;
         $multiple = (is_null($multiple)) ? $this->multiple : $multiple;
 
-        return qtype_matrix_grading::cell_name($row_id, $col_id, $multiple);
+        return qtype_matrix_grading::cell_name($rowid, $colid, $multiple);
     }
 
     /**
@@ -89,38 +101,37 @@ class qtype_matrix_question extends question_graded_automatically_with_countback
      * @return boolean True if the cell($row, $col) was checked by the user. False otherwise.
      */
     public function response($response, $row, $col) {
-        /**
-         * A student may response with a question with the multiple answer turned on.
-         * Later the teacher may turn that flag off. The result is that the question
-         * and response formats won't match.
-         *
-         * To fix that problem we don't use the question->multiple flag but instead we
-         * use the use the user's response to detect the correct value.
-         *
-         * Note
-         * A part of the problems come from the fact that we use two representation formats
-         * depending on the multiple flags. The cause is the html matrix representation
-         * that requires two differents views (checkboxes or radio). This representation
-         * then leaks to memory.
-         *
-         * A better strategy would be to use only one normalized representation in memory.
-         * The same way we have only one representation in the DB. For that we
-         * would need to transform the html form data after the post.
-         * Not sure we can dot it.
-         */
-        $response_multiple = $this->multiple;
+         // A student may response with a question with the multiple answer turned on.
+         // Later the teacher may turn that flag off. The result is that the question
+         // and response formats won't match.
+
+         // To fix that problem we don't use the question->multiple flag but instead we
+         // use the use the user's response to detect the correct value.
+
+         // Note
+         // A part of the problems come from the fact that we use two representation formats
+         // depending on the multiple flags. The cause is the html matrix representation
+         // that requires two differents views (checkboxes or radio). This representation
+         // then leaks to memory.
+
+         // A better strategy would be to use only one normalized representation in memory.
+         // The same way we have only one representation in the DB. For that we
+         // would need to transform the html form data after the post.
+         // Not sure we can dot it.
+
+        $responsemultiple = $this->multiple;
         foreach ($response as $key => $value) {
-            $response_multiple = (strpos($key, '_') !== false);
+            $responsemultiple = (strpos($key, '_') !== false);
             break;
         }
 
-        $key = $this->key($row, $col, $response_multiple);
+        $key = $this->key($row, $col, $responsemultiple);
         $value = isset($response[$key]) ? $response[$key] : false;
         if ($value === false) {
             return false;
         }
 
-        if ($response_multiple) {
+        if ($responsemultiple) {
             return !empty($value);
         } else {
             return $value == $col->id;
@@ -157,16 +168,14 @@ class qtype_matrix_question extends question_graded_automatically_with_countback
      *          Which variant of this question to start. Will be between
      *          1 and {@link get_num_variants()} inclusive.
      */
-    function start_attempt(question_attempt_step $step, $variant) {
+    public function start_attempt(question_attempt_step $step, $variant) {
         global $PAGE;
-        // mod_ND : BEGIN
         if ($this->use_dnd_ui && !$PAGE->requires->is_head_done()) {
             $PAGE->requires->jquery();
             $PAGE->requires->jquery_plugin('ui');
             $PAGE->requires->jquery_plugin('ui-css');
             $PAGE->requires->js('/question/type/matrix/js/dnd.js');
         }
-        // mod_ND : END
         $this->order = array_keys($this->rows);
         if ($this->shuffle_answers()) {
             shuffle($this->order);
@@ -186,7 +195,7 @@ class qtype_matrix_question extends question_graded_automatically_with_countback
      * @global object $PAGE     Page object
      * @return boolean          True if shuffling is authorized. False otherwise.
      */
-    function shuffle_authorized() {
+    public function shuffle_authorized() {
         global $DB, $PAGE;
 
         $cm = $PAGE->cm;
@@ -201,7 +210,7 @@ class qtype_matrix_question extends question_graded_automatically_with_countback
      *
      * @return boolean True if rows should be shuffled. False otherwise.
      */
-    function shuffle_answers() {
+    public function shuffle_answers() {
         if (!$this->shuffle_authorized()) {
             return false;
         }
@@ -227,10 +236,8 @@ class qtype_matrix_question extends question_graded_automatically_with_countback
         if ($order !== null) {
             $this->order = explode(',', $order);
         } else {
-            /**
-             * The order doesn't exist in the database.
-             * This can happen because the question is old and doesn't have the shuffling possibility yet.
-             */
+            // The order doesn't exist in the database.
+            // This can happen because the question is old and doesn't have the shuffling possibility yet.
             $this->order = array_keys($this->rows);
             if ($this->shuffle_answers()) {
                 shuffle($this->order);
@@ -238,34 +245,30 @@ class qtype_matrix_question extends question_graded_automatically_with_countback
             $this->write_order($step);
         }
 
-        /**
-         * Rows can be deleted between attempts. We need therefore to remove
-         * those that were stored in the step but are not present anymore.
-         */
-        $rows_removed = array();
-        foreach ($this->order as $row_key) {
-            if (!isset($this->rows[$row_key])) {
-                $rows_removed[] = $row_key;
+        // Rows can be deleted between attempts. We need therefore to remove
+        // those that were stored in the step but are not present anymore.
+        $rowsremoved = array();
+        foreach ($this->order as $rowkey) {
+            if (!isset($this->rows[$rowkey])) {
+                $rowsremoved[] = $rowkey;
             }
         }
-        $this->order = array_diff($this->order, $rows_removed);
+        $this->order = array_diff($this->order, $rowsremoved);
 
-        /**
-         * Rows can be added between attempts. We need therefore to add those
-         * rows that were not stored in the step.
-         */
-        $rows_added = array();
-        $rows_keys = array_keys($this->rows);
-        foreach ($rows_keys as $row_key) {
-            if (!in_array($row_key, $this->order)) {
-                $rows_added[] = $row_key;
+        // Rows can be added between attempts. We need therefore to add those
+        // rows that were not stored in the step.
+        $rowsadded = array();
+        $rowskeys = array_keys($this->rows);
+        foreach ($rowskeys as $rowkey) {
+            if (!in_array($rowkey, $this->order)) {
+                $rowsadded[] = $rowkey;
             }
         }
         if ($this->shuffle_answers()) {
-            shuffle($rows_added);
+            shuffle($rowsadded);
         }
-        foreach ($rows_added as $row_key) {
-            $this->order[] = $row_key;
+        foreach ($rowsadded as $rowkey) {
+            $this->order[] = $rowkey;
         }
     }
 
@@ -282,8 +285,7 @@ class qtype_matrix_question extends question_graded_automatically_with_countback
      * @param question_attempt_step $step The first step of the {@link question_attempt}
      *      being loaded.
      */
-    function apply_attempt_state(question_attempt_step $step) {
-        // mod_ND : BEGIN
+    public function apply_attempt_state(question_attempt_step $step) {
         if ($this->use_dnd_ui) {
             global $PAGE;
             $PAGE->requires->jquery();
@@ -291,7 +293,6 @@ class qtype_matrix_question extends question_graded_automatically_with_countback
             $PAGE->requires->jquery_plugin('ui-css');
             $PAGE->requires->js('/question/type/matrix/js/dnd.js');
         }
-        // mod_ND : END
         $this->load_data($step);
     }
 
@@ -322,7 +323,16 @@ class qtype_matrix_question extends question_graded_automatically_with_countback
      * sequence of response.
      */
     public function compute_final_grade($responses, $totaltries) {
-        $x = 1 / 0;
+        $gradedvalue = 0;
+        $cnt = 1;
+        foreach ($responses as $response) {
+            $x = $this->grade_response($response);
+            $gradedvalue += $x[0];
+            if ($cnt++ > $totaltries) {
+                 break;
+            }
+        }
+        return $gradedvalue;
     }
 
     /**
@@ -342,7 +352,7 @@ class qtype_matrix_question extends question_graded_automatically_with_countback
         foreach ($this->rows as $row) {
             $key = $this->key($row, 0);
             if (!isset($response[$key])) {
-                return false;
+                 return false;
             }
         }
         return true;
@@ -355,8 +365,8 @@ class qtype_matrix_question extends question_graded_automatically_with_countback
      * @return string the message.
      */
     public function get_validation_error(array $response) {
-        $is_gradable = $this->is_gradable_response($response);
-        if ($is_gradable) {
+        $isgradable = $this->is_gradable_response($response);
+        if ($isgradable) {
             return '';
         }
         return lang::one_answer_per_row();
@@ -371,19 +381,15 @@ class qtype_matrix_question extends question_graded_automatically_with_countback
     public function summarise_response(array $response) {
         $result = array();
 
-        $row_index = 0;
         foreach ($this->order as $rowid) {
             $row = $this->rows[$rowid];
-            $col_index = 0;
             foreach ($this->cols as $col) {
                 $key = $this->key($row, $col);
                 $value = isset($response[$key]) ? $response[$key] : false;
                 if ($value == $col->id) {
                     $result[] = "{$row->shorttext}: {$col->shorttext}";
                 }
-                $col_index++;
             }
-            $row_index++;
         }
         return implode("; ", $result);
     }
@@ -403,12 +409,12 @@ class qtype_matrix_question extends question_graded_automatically_with_countback
         if (count($prevresponse) != count($newresponse)) {
             return false;
         }
-        foreach ($prevresponse as $key => $previous_value) {
+        foreach ($prevresponse as $key => $previousvalue) {
             if (!isset($newresponse[$key])) {
                 return false;
             }
-            $new_value = $newresponse[$key];
-            if ($new_value != $previous_value) {
+            $newvalue = $newresponse[$key];
+            if ($newvalue != $previousvalue) {
                 return false;
             }
         }
@@ -494,7 +500,7 @@ class qtype_matrix_question extends question_graded_automatically_with_countback
      * Returns an array where keys are the weights' cell names and the values
      * are the weights
      */
-    public function getIterator() {
+    public function getiterator() {
         return new ArrayIterator($this->cells());
     }
 

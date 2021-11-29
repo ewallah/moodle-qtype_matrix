@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Base class for grading types
@@ -10,8 +24,7 @@ abstract class qtype_matrix_grading
 
     public static function gradings() {
         static $result = false;
-        if ($result)
-        {
+        if ($result) {
             return $result;
         }
         $result = array();
@@ -19,12 +32,10 @@ abstract class qtype_matrix_grading
         $dir = dirname(__FILE__) . '/grading';
         $files = scandir($dir);
         $files = array_diff($files, array('.', '..'));
-        foreach ($files as $file)
-        {
+        foreach ($files as $file) {
             include_once("$dir/$file");
             $class = str_replace('.class.php', '', $file);
-            if (class_exists($class))
-            {
+            if (class_exists($class)) {
                 $result[] = new $class();
             }
         }
@@ -41,14 +52,14 @@ abstract class qtype_matrix_grading
      * @return qtype_matrix_grading
      */
     public static function create($type) {
+        global $CFG;
         static $result = array();
-        if (isset($result[$type]))
-        {
+        if (isset($result[$type])) {
             return $result[$type];
         }
         $class = 'qtype_matrix_grading_' . $type;
 
-        require_once dirname(__FILE__) . '/grading/' . $class . '.class.php';
+        require_once($CFG->dirroot . "/question/type/matrix/grading/$class.class.php");
         return $result[$type] = call_user_func(array($class, 'create'), $type);
     }
 
@@ -73,14 +84,11 @@ abstract class qtype_matrix_grading
      * @return object
      */
     public function create_cell_element($form, $row, $col, $multiple) {
-        $cell_name = $this->cell_name($row, $col, $multiple);
-        if ($multiple)
-        {
-            return $form->createElement('checkbox', $cell_name, 'label');
-        }
-        else
-        {
-            return $form->createElement('radio', $cell_name, '', '', $col);
+        $cellname = $this->cell_name($row, $col, $multiple);
+        if ($multiple) {
+            return $form->createElement('checkbox', $cellname, 'label');
+        } else {
+            return $form->createElement('radio', $cellname, '', '', $col);
         }
     }
 
@@ -115,8 +123,7 @@ abstract class qtype_matrix_grading
      */
     public function grade_question($question, $answers) {
         $grades = array();
-        foreach ($question->rows as $row)
-        {
+        foreach ($question->rows as $row) {
             $grades[] = $this->grade_row($question, $row, $answers);
         }
         $result = array_sum($grades) / count($grades);
@@ -134,6 +141,7 @@ abstract class qtype_matrix_grading
      * @return float
      */
     public function grade_row($question, $row, $answers) {
+        mtrace('grading');
         return 0;
     }
 
@@ -148,13 +156,12 @@ abstract class qtype_matrix_grading
         return array();
     }
 
-    // **
-    // * whether this grade method requires manual intervention
-    // */
-    // public function is_manual_graded()
-    // {
-    // return false;
-    // }
+    /**
+     * Whether this grade method requires manual intervention
+     */
+    public function is_manual_graded() {
+        return false;
+    }
 
     protected function col_count($data) {
         return count($data['cols_shorttext']);

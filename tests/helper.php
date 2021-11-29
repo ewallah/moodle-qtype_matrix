@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Test helpers for the truefalse question type.
@@ -13,7 +27,7 @@ class qtype_matrix_test_helper extends question_test_helper
 {
 
     public function get_test_questions() {
-        return array('kprime', 'all', 'any', 'none', 'weighted', 'multiple', 'single');
+        return array('kprime', 'all', 'kany', 'none', 'weighted', 'multiple', 'single');
     }
 
     /**
@@ -60,9 +74,9 @@ class qtype_matrix_test_helper extends question_test_helper
      *
      * @return qtype_matrix_question
      */
-    public function make_matrix_question_any() {
+    public function make_matrix_question_kany() {
         $result = $this->make_matrix_question();
-        $result->grademethod = 'any';
+        $result->grademethod = 'kany';
         return $result;
     }
 
@@ -95,19 +109,17 @@ class qtype_matrix_test_helper extends question_test_helper
         $result->cols = array();
         $result->weights = array();
 
-        for ($r = 0; $r < 4; $r++)
-        {
+        for ($r = 0; $r < 4; $r++) {
             $row = (object) array();
             $row->id = $r;
             $row->shorttext = "Row $r";
             $row->description = "Description $r";
             $row->feedback = "Feedback $r";
             $result->rows[$r] = $row;
-            for ($c = 0; $c < 4; $c++)
-            {
+            for ($c = 0; $c < 4; $c++) {
                 $col = (object) array();
                 $col->id = $c;
-                $col->shortext = "Column $c";
+                $col->shorttext = "Column $c";
                 $col->description = "Description $c";
                 $result->cols[$c] = $col;
 
@@ -139,19 +151,17 @@ class qtype_matrix_test_helper extends question_test_helper
         $result->cols = array();
         $result->weights = array();
 
-        for ($r = 0; $r < 4; $r++)
-        {
+        for ($r = 0; $r < 4; $r++) {
             $row = (object) array();
             $row->id = $r;
             $row->shorttext = "Row $r";
             $row->description = "Description $r";
             $row->feedback = "Feedback $r";
             $result->rows[$r] = $row;
-            for ($c = 0; $c < 4; $c++)
-            {
+            for ($c = 0; $c < 4; $c++) {
                 $col = (object) array();
                 $col->id = $c;
-                $col->shortext = "Column $c";
+                $col->shorttext = "Column $c";
                 $col->description = "Description $c";
                 $result->cols[$c] = $col;
 

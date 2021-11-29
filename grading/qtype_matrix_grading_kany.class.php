@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Per row grading. The total grade is the average of grading received
@@ -34,19 +48,20 @@ class qtype_matrix_grading_kany extends qtype_matrix_grading
     }
 
     public function grade_question($question, $answers) {
-        $numberOfCorrectRows = 0;
+        $correctrows = 0;
         foreach ($question->rows as $row) {
             $grade = $this->grade_row($question, $row, $answers);
             if ($grade >= 1) {
-                $numberOfCorrectRows++;
+                $correctrows++;
             }
         }
-        if ($numberOfCorrectRows == count($question->rows)) {
+        $count = count($question->rows);
+        if ($correctrows === $count) {
             return 1;
-        } else if ((count($question->rows) - $numberOfCorrectRows) == 1) {
-            return 0.5;
+        } else if ($correctrows === 0) {
+            return 0;
         }
-        return 0;
+        return 0.5;
     }
 
     /**
@@ -58,7 +73,7 @@ class qtype_matrix_grading_kany extends qtype_matrix_grading
      * @return float                            The row grade, either 0 or 1
      */
     public function grade_row($question, $row, $responses) {
-        $one_correct_answer = false;
+        $onecorrect = false;
         foreach ($question->cols as $col) {
             $answer = $question->answer($row, $col);
             $response = $question->response($responses, $row, $col);
@@ -66,10 +81,10 @@ class qtype_matrix_grading_kany extends qtype_matrix_grading
                 return 0;
             }
             if ($answer && $response) {
-                $one_correct_answer = true;
+                $onecorrect = true;
             }
         }
-        return ($one_correct_answer) ? 1 : 0;
+        return ($onecorrect) ? 1 : 0;
     }
 
     public function validation($data) {

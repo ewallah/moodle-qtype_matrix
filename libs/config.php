@@ -3,8 +3,7 @@
 /**
  *
  */
-class config
-{
+class config {
 
     const COMPONENT = 'qtype_matrix';
 
